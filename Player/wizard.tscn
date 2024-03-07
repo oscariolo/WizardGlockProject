@@ -56,3 +56,9 @@ shape = SubResource("RectangleShape2D_lqkql")
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)
 process_callback = 0
+
+[node name="buffer_jump" type="Timer" parent="."]
+wait_time = 0.058
+one_shot = true
+
+[connection signal="timeout" from="buffer_jump" to="." method="_on_buffer_jump_timeout"]

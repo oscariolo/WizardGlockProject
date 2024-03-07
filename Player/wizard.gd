@@ -15,12 +15,12 @@ func _physics_process(delta):
 	_manage_animations()
 	move_and_slide()
 	
-	if velocity.y != 0:
-		if velocity.y <0:
-			print("jumping: ")
-		else:
-			print("falling")
-		print(velocity.y)
+	#if velocity.y != 0:
+		#if velocity.y <0:
+			#print("jumping: ")
+		#else:
+			#print("falling")
+		#print(velocity.y)
 
 func _manage_movement(delta):
 	facing_direction = Input.get_axis("move_left","move_right")
@@ -35,22 +35,23 @@ func _manage_movement(delta):
 	#like mario holding longer makes it jump higher
 	
 	#the longer the input the higher the jump, velocity defined
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = base_jump_force
+	if Input.is_action_just_pressed("jump"):
+		if is_on_floor():
+			velocity.y = base_jump_force
+		else:
+			_buffer_jump()
 	if Input.is_action_pressed("crouch"): #falling state, fall is faster than jump if it crouches
 		velocity.y = FALL_CROUCH_BOOST + FALL_LIMIT_VELOCITY
 	if velocity.y < 0 and Input.is_action_just_released("jump"): #jumping state
 		velocity.y += GRAVITY * 10
 		#maybe an input buffer for jumping right at the moment it touches floor
 		
-		
-	
-	
 	#if input was jump then velocity y is decreased
-	
-	
-	
-	
+
+
+func _buffer_jump():
+	$buffer_jump.start()
+
 
 func _manage_animations():
 	if facing_direction == -1:
@@ -59,3 +60,10 @@ func _manage_animations():
 		animations.flip_h = false
 	
 
+
+
+func _on_buffer_jump_timeout():
+	if is_on_floor():
+		velocity.y = base_jump_force
+		print("buffered jump")
+	
