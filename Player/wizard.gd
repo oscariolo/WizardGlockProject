@@ -1,9 +1,9 @@
 extends CharacterBody2D
 @onready var animations = $Animations
-const GRAVITY = 20
+const GRAVITY = 200 * 60
 const FALL_LIMIT_VELOCITY = 350
 const FALL_CROUCH_BOOST = 65
-const base_jump_force =  -330
+const base_jump_force =  -800
 var base_speed = 200
 var facing_direction = 0
 
@@ -25,28 +25,32 @@ func _physics_process(delta):
 func _manage_movement(delta):
 	facing_direction = Input.get_axis("move_left","move_right")
 	#base gravity
-	if velocity.y <= FALL_LIMIT_VELOCITY:
-		velocity.y += GRAVITY
-	else:
-		velocity.y = FALL_LIMIT_VELOCITY
-	#move left and right
-	velocity.x = base_speed * facing_direction
-	#jump mechanic
-	#like mario holding longer makes it jump higher
+	#if velocity.y <= FALL_LIMIT_VELOCITY:
+		#velocity.y += GRAVITY * delta
+	#else:
+		#velocity.y = FALL_LIMIT_VELOCITY
+	##move left and right
+	#velocity.x = base_speed * facing_direction
+	##jump mechanic
+	##like mario holding longer makes it jump higher
+	#
+	##the longer the input the higher the jump, velocity defined
+	#if Input.is_action_just_pressed("jump"):
+		#if is_on_floor():
+			#velocity.y = base_jump_force
+		#else:
+			#_buffer_jump()
+	#if Input.is_action_pressed("crouch"): #falling state, fall is faster than jump if it crouches
+		#velocity.y = FALL_CROUCH_BOOST + FALL_LIMIT_VELOCITY
+	#if velocity.y < 0 and Input.is_action_just_released("jump"): #jumping state
+		#velocity.y += GRAVITY * 10
+		###maybe an input buffer for jumping right at the moment it touches floor
+	###if input was jump then velocity y is decreased
+	#REWRITE WITH DELTA
+	velocity.y = GRAVITY*delta  #pixeles/frame
 	
-	#the longer the input the higher the jump, velocity defined
-	if Input.is_action_just_pressed("jump"):
-		if is_on_floor():
-			velocity.y = base_jump_force
-		else:
-			_buffer_jump()
-	if Input.is_action_pressed("crouch"): #falling state, fall is faster than jump if it crouches
-		velocity.y = FALL_CROUCH_BOOST + FALL_LIMIT_VELOCITY
-	if velocity.y < 0 and Input.is_action_just_released("jump"): #jumping state
-		velocity.y += GRAVITY * 10
-		#maybe an input buffer for jumping right at the moment it touches floor
-		
-	#if input was jump then velocity y is decreased
+	
+	
 
 
 func _buffer_jump():
@@ -67,3 +71,5 @@ func _on_buffer_jump_timeout():
 		velocity.y = base_jump_force
 		print("buffered jump")
 	
+
+

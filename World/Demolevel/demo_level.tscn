@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://crigb6usuabq5"]
+[gd_scene load_steps=10 format=3 uid="uid://crigb6usuabq5"]
 
+[ext_resource type="Script" path="res://World/Demolevel/demo_level.gd" id="1_rt0tb"]
 [ext_resource type="Texture2D" uid="uid://bxgk16vs36w4l" path="res://World/Demolevel/resources/blockPack.png" id="1_u4gyv"]
 [ext_resource type="PackedScene" uid="uid://brqv7xwnfndx8" path="res://Player/wizard.tscn" id="2_c7djl"]
 [ext_resource type="Script" path="res://World/Demolevel/BG.gd" id="2_le2yx"]
 [ext_resource type="Texture2D" uid="uid://sb5hgu36yulf" path="res://World/Demolevel/resources/darkPurple.png" id="3_8ritb"]
+[ext_resource type="Script" path="res://World/Demolevel/Label.gd" id="6_xilnk"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jmgtp"]
 texture = ExtResource("1_u4gyv")
@@ -318,12 +320,16 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 2
 sources/6 = SubResource("TileSetAtlasSource_jmgtp")
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r470y"]
+size = Vector2(1148, 26)
+
 [node name="DemoLevel" type="Node2D"]
+script = ExtResource("1_rt0tb")
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_xe004")
 format = 2
-layer_0/tile_data = PackedInt32Array(786463, 65542, 0, 786464, 65542, 0, 786462, 65542, 0, 786465, 65542, 0, 786466, 65542, 0, 786467, 65542, 0, 786448, 65542, 0, 786449, 65542, 0, 786450, 65542, 0, 786451, 65542, 0, 786452, 65542, 0, 786453, 65542, 0, 786454, 65542, 0, 786455, 65542, 0, 786456, 65542, 0, 786457, 65542, 0, 786458, 65542, 0, 786459, 65542, 0, 786460, 65542, 0, 786461, 65542, 0, 786468, 65542, 0, 786469, 65542, 0, 786470, 65542, 0, 786471, 65542, 0, 786472, 65542, 0, 786473, 65542, 0, 786474, 65542, 0, 786475, 65542, 0, 786476, 65542, 0, 786477, 65542, 0, 786478, 65542, 0, 786479, 65542, 0, 458788, 65542, 0, 458789, 65542, 0, 458790, 65542, 0, 458791, 65542, 0, 524310, 65542, 0, 524311, 65542, 0, 524312, 65542, 0, 524313, 65542, 0, 655405, 65542, 0, 655406, 65542, 0, 655407, 65542, 0, 655408, 65542, 0, 655409, 65542, 0)
+layer_0/tile_data = PackedInt32Array(786462, 65542, 0, 786465, 65542, 0, 786466, 65542, 0, 786467, 65542, 0, 786461, 65542, 0, 786468, 65542, 0, 786469, 65542, 0, 786470, 65542, 0, 786471, 65542, 0, 786472, 65542, 0, 786473, 65542, 0, 786474, 65542, 0, 786475, 65542, 0, 786476, 65542, 0, 786477, 65542, 0, 786478, 65542, 0, 786479, 65542, 0, 458788, 65542, 0, 458789, 65542, 0, 458790, 65542, 0, 458791, 65542, 0, 524310, 65542, 0, 524311, 65542, 0, 524312, 65542, 0, 524313, 65542, 0, 655405, 65542, 0, 655406, 65542, 0, 655407, 65542, 0, 655408, 65542, 0, 655409, 65542, 0)
 
 [node name="BG" type="ParallaxBackground" parent="."]
 scroll_ignore_camera_zoom = true
@@ -340,3 +346,19 @@ centered = false
 
 [node name="Wizard" parent="." instance=ExtResource("2_c7djl")]
 position = Vector2(576, 320)
+
+[node name="respawn" type="Area2D" parent="."]
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="respawn"]
+position = Vector2(577, 588)
+shape = SubResource("RectangleShape2D_r470y")
+
+[node name="Label" type="Label" parent="."]
+offset_left = 558.0
+offset_top = 424.0
+offset_right = 598.0
+offset_bottom = 447.0
+script = ExtResource("6_xilnk")
+
+[connection signal="body_entered" from="respawn" to="." method="_on_respawn_body_entered"]
