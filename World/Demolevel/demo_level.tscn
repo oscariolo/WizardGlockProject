@@ -345,7 +345,7 @@ texture = ExtResource("3_8ritb")
 centered = false
 
 [node name="Wizard" parent="." instance=ExtResource("2_c7djl")]
-position = Vector2(576, 320)
+position = Vector2(679, 179)
 
 [node name="respawn" type="Area2D" parent="."]
 collision_mask = 3

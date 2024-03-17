@@ -1,0 +1,64 @@
+[gd_scene load_steps=8 format=3 uid="uid://brqv7xwnfndx8"]
+
+[ext_resource type="Script" path="res://Player/wizard.gd" id="1_a35nm"]
+[ext_resource type="Texture2D" uid="uid://cpajceomrvsd0" path="res://Player/sprites/wizardwithgun-Sheet.png" id="1_b175x"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e74y4"]
+atlas = ExtResource("1_b175x")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_egaio"]
+atlas = ExtResource("1_b175x")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxn4h"]
+atlas = ExtResource("1_b175x")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hve4d"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e74y4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_egaio")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxn4h")
+}],
+"loop": true,
+"name": &"walking",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lqkql"]
+size = Vector2(17, 28)
+
+[node name="Wizard" type="CharacterBody2D"]
+collision_layer = 2
+script = ExtResource("1_a35nm")
+
+[node name="Animations" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_hve4d")
+animation = &"walking"
+frame_progress = 0.394514
+
+[node name="Hitbox" type="CollisionShape2D" parent="."]
+position = Vector2(-0.5, 2)
+shape = SubResource("RectangleShape2D_lqkql")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)
+process_callback = 0
+
+[node name="buffer_jump" type="Timer" parent="."]
+wait_time = 0.058
+one_shot = true
+
+[connection signal="timeout" from="buffer_jump" to="." method="_on_buffer_jump_timeout"]
