@@ -7,6 +7,7 @@ const FALL_CROUCH_BOOST = 50
 const base_jump_force =  -20000
 var base_speed = 10000 #* 60
 var facing_direction = 0
+var last_facing_direction
 var canDash = true
 var is_dashing = false
 
@@ -24,10 +25,15 @@ func _manage_movement(delta):
 	facing_direction[0] = sign(facing_direction[0])
 	facing_direction[1] = sign(facing_direction[1])
 	#move left and right while not dashing
-	#TODO el ultimo input que tuvo el dash debe ser guardado para conservar momentum
-	#de lo contrario si el usuario suelta, fabricio se detiene en medio aire
+	#TODO debe mejorarse el input dash, con el fin de que al dashear y un poco despues ingresar
+	#input debe seguir esa direccion
+	#IDEA: Celeste al parecer conserva la direccion a la que Madeline esta observando
+	#como base madeline dashea para ese lado por default (sin input), si dashea y pocos 
+	#frames despues se mueve seguira esa direccion.
+	
+	
 	if is_dashing:
-		velocity = facing_direction * Vector2(500,350)
+		velocity = last_facing_direction * Vector2(500,350)
 	else:
 		velocity.x = base_speed * facing_direction[0] * delta
 	#gravity
@@ -57,6 +63,7 @@ func _manage_movement(delta):
 	#dash jump
 	if Input.is_action_just_pressed("dash"):
 		if canDash:
+			last_facing_direction = facing_direction
 			_dash_jump()
 	#base gravity
 
