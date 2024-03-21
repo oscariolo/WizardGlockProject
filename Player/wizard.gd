@@ -1,6 +1,6 @@
 extends CharacterBody2D
 @onready var animations = $Animations
-const GRAVITY = 800 #* 60
+const GRAVITY = 980 #* 60
 const FALL_LIMIT_VELOCITY = 300
 const FALL_COMPENSATION = 100
 const FALL_CROUCH_BOOST = 50
@@ -18,15 +18,24 @@ func _physics_process(delta):
 	_manage_movement(delta)
 	_manage_animations()
 	move_and_slide()
-	
 
 func _manage_movement(delta):
-	facing_direction = Input.get_axis("move_left","move_right")
-	#move left and right
-	velocity.x = base_speed * facing_direction * delta
+	facing_direction = Input.get_vector("move_left","move_right","face_up","face_down").normalized()
+	facing_direction[0] = sign(facing_direction[0])
+	facing_direction[1] = sign(facing_direction[1])
+	#move left and right while not dashing
+	#TODO el ultimo input que tuvo el dash debe ser guardado para conservar momentum
+	#de lo contrario si el usuario suelta, fabricio se detiene en medio aire
+	if is_dashing:
+		velocity = facing_direction * Vector2(500,350)
+	else:
+		velocity.x = base_speed * facing_direction[0] * delta
 	#gravity
 	if velocity.y < FALL_LIMIT_VELOCITY:
 		velocity.y += GRAVITY * delta
+	if is_on_floor():
+		canDash = true
+		is_dashing = false
 
 	#jump mechanic
 	#base jump
@@ -47,41 +56,23 @@ func _manage_movement(delta):
 	
 	#dash jump
 	if Input.is_action_just_pressed("dash"):
-		_dash_jump(delta)
-	
-	velocity.x = lerp(velocity.x,0.0,0.1)
-	
+		if canDash:
+			_dash_jump()
 	#base gravity
 
-
-func _dash_jump(delta):
-	if canDash:
-		var dash_direction = Input.get_vector("move_left","move_right","face_up","face_down")
-		#velocity = velocity + dash_direction.normalized() * Vector2(1000,1000)
-		#print(velocity)
-		dash_direction = dash_direction.normalized()
-		if abs(dash_direction.x) > 0.5:
-			dash_direction.x = sign(dash_direction.x)
-		elif abs(dash_direction.x) < 0.5:
-			dash_direction.x = sign(dash_direction.x)
-		
-		if abs(dash_direction.y) > 0.5:
-			dash_direction.y = sign(dash_direction.y)
-		elif abs(dash_direction.y) < 0.5:
-			dash_direction.y = sign(dash_direction.y)
-			
-		velocity = dash_direction * Vector2(2000*60,400*60) * delta
-		
-	
+func _dash_jump():
+	$dashing_time.start()
+	canDash = false
+	is_dashing = true
 	
 func _buffer_jump():
 	$buffer_jump.start()
 
 
 func _manage_animations():
-	if facing_direction == -1:
+	if facing_direction[0] == -1:
 		animations.flip_h = true
-	if facing_direction == 1:
+	if facing_direction[0] == 1:
 		animations.flip_h = false
 	
 
@@ -91,6 +82,9 @@ func _on_buffer_jump_timeout():
 	if is_on_floor():
 		#velocity.y = base_jump_force * get_physics_process_delta_time()
 		print("buffered jump")
+
 	
 
 
+func _on_dashing_time_timeout():
+	is_dashing = false

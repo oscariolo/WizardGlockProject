@@ -61,4 +61,9 @@ process_callback = 0
 wait_time = 0.058
 one_shot = true
 
+[node name="dashing_time" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+
 [connection signal="timeout" from="buffer_jump" to="." method="_on_buffer_jump_timeout"]
+[connection signal="timeout" from="dashing_time" to="." method="_on_dashing_time_timeout"]
