@@ -11,6 +11,7 @@ var facing_direction = Vector2(0,0)
 var last_facing_direction
 var canDash = true
 var is_dashing = false
+var has_compensated = false
 
 
 func _ready():
@@ -25,17 +26,14 @@ func _manage_movement(delta):
 	facing_direction = Input.get_vector("move_left","move_right","face_up","face_down").normalized()
 	facing_direction[0] = sign(facing_direction[0])
 	facing_direction[1] = sign(facing_direction[1])
-
+	
+	if is_on_floor():
+		has_compensated = false
 	#gravity
 	if velocity.y < FALL_LIMIT_VELOCITY:
 		velocity.y += GRAVITY * delta
 	
 	#move left and right while not dashing
-	#TODO debe mejorarse el input dash, con el fin de que al dashear y un poco despues ingresar
-	#input debe seguir esa direccion
-	#IDEA: Celeste al parecer conserva la direccion a la que Madeline esta observando
-	#como base madeline dashea para ese lado por default (sin input), si dashea y pocos 
-	#frames despues se mueve seguira esa direccion.
 	
 	if is_dashing:
 		velocity = last_facing_direction * DASHING_VELOCITY
@@ -60,8 +58,11 @@ func _manage_movement(delta):
 		velocity.y = FALL_CROUCH_BOOST + FALL_LIMIT_VELOCITY
 	
 	#fall compensation
-	if velocity.y <= 0 and Input.is_action_just_released("jump"): #jumping state and release jump
-		velocity.y += FALL_COMPENSATION
+	if velocity.y <= 0 and Input.is_action_just_released("jump") and not has_compensated: #jumping state and release jump
+		velocity.y += 120
+		has_compensated = true
+	
+		
 	
 	#dash jump
 	if Input.is_action_just_pressed("dash"):
@@ -88,22 +89,15 @@ func _manage_animations():
 		animations.flip_h = true
 	if facing_direction[0] == 1:
 		animations.flip_h = false
-	print(velocity)
 	if velocity.x != 0:
 		$Animations.play("walking")
 	else:
 		$Animations.play("idle")
 	
 
-
-
 func _on_buffer_jump_timeout():
 	if is_on_floor():
-		#velocity.y = BASE_JUMP_FORCE * get_physics_process_delta_time()
-		print("buffered jump")
-
-	
-
+		velocity.y = BASE_JUMP_FORCE * get_physics_process_delta_time()
 
 func _on_dashing_time_timeout():
 	is_dashing = false
