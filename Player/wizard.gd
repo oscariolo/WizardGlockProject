@@ -4,16 +4,17 @@ const GRAVITY = 980 #* 60
 const FALL_LIMIT_VELOCITY = 300
 const FALL_COMPENSATION = 100
 const FALL_CROUCH_BOOST = 50
-const base_jump_force =  -20000
+const BASE_JUMP_FORCE =  -20000
+const DASHING_VELOCITY = Vector2(500,350)
 var base_speed = 10000 #* 60
-var facing_direction = 0
+var facing_direction = Vector2(0,0)
 var last_facing_direction
 var canDash = true
 var is_dashing = false
 
 
 func _ready():
-	$Animations.play("walking")
+	$Animations.play("idle")
 
 func _physics_process(delta):
 	_manage_movement(delta)
@@ -24,6 +25,11 @@ func _manage_movement(delta):
 	facing_direction = Input.get_vector("move_left","move_right","face_up","face_down").normalized()
 	facing_direction[0] = sign(facing_direction[0])
 	facing_direction[1] = sign(facing_direction[1])
+
+	#gravity
+	if velocity.y < FALL_LIMIT_VELOCITY:
+		velocity.y += GRAVITY * delta
+	
 	#move left and right while not dashing
 	#TODO debe mejorarse el input dash, con el fin de que al dashear y un poco despues ingresar
 	#input debe seguir esa direccion
@@ -31,15 +37,12 @@ func _manage_movement(delta):
 	#como base madeline dashea para ese lado por default (sin input), si dashea y pocos 
 	#frames despues se mueve seguira esa direccion.
 	
-	
 	if is_dashing:
-		velocity = last_facing_direction * Vector2(500,350)
+		velocity = last_facing_direction * DASHING_VELOCITY
 	else:
 		velocity.x = base_speed * facing_direction[0] * delta
-	#gravity
-	if velocity.y < FALL_LIMIT_VELOCITY:
-		velocity.y += GRAVITY * delta
-	if is_on_floor():
+	
+	if is_on_floor() and not is_dashing:
 		canDash = true
 		is_dashing = false
 
@@ -47,7 +50,7 @@ func _manage_movement(delta):
 	#base jump
 	if Input.is_action_just_pressed("jump"):
 		if is_on_floor():
-			velocity.y = base_jump_force * delta
+			velocity.y = BASE_JUMP_FORCE * delta
 		else:
 			_buffer_jump()
 
@@ -63,9 +66,13 @@ func _manage_movement(delta):
 	#dash jump
 	if Input.is_action_just_pressed("dash"):
 		if canDash:
+			if facing_direction[0] == 0 and facing_direction[1] != 1 and facing_direction[1] != -1:
+				if animations.flip_h == false:
+					facing_direction[0] = 1
+				else:
+					facing_direction[0] = -1
 			last_facing_direction = facing_direction
 			_dash_jump()
-	#base gravity
 
 func _dash_jump():
 	$dashing_time.start()
@@ -81,13 +88,18 @@ func _manage_animations():
 		animations.flip_h = true
 	if facing_direction[0] == 1:
 		animations.flip_h = false
+	print(velocity)
+	if velocity.x != 0:
+		$Animations.play("walking")
+	else:
+		$Animations.play("idle")
 	
 
 
 
 func _on_buffer_jump_timeout():
 	if is_on_floor():
-		#velocity.y = base_jump_force * get_physics_process_delta_time()
+		#velocity.y = BASE_JUMP_FORCE * get_physics_process_delta_time()
 		print("buffered jump")
 
 	
