@@ -12,6 +12,7 @@ var last_facing_direction
 var canDash = true
 var is_dashing = false
 var has_compensated = false
+var dash_jump = false
 
 
 func _ready():
@@ -28,7 +29,7 @@ func _manage_movement(delta):
 	facing_direction[1] = sign(facing_direction[1])
 	
 	if is_on_floor():
-		has_compensated = false
+		has_compensated = false 
 	#gravity
 	if velocity.y < FALL_LIMIT_VELOCITY:
 		velocity.y += GRAVITY * delta
@@ -39,6 +40,7 @@ func _manage_movement(delta):
 		velocity = last_facing_direction * DASHING_VELOCITY
 	else:
 		velocity.x = base_speed * facing_direction[0] * delta
+		dash_jump = false
 	
 	if is_on_floor() and not is_dashing:
 		canDash = true
@@ -48,9 +50,16 @@ func _manage_movement(delta):
 	#base jump
 	if Input.is_action_just_pressed("jump"):
 		if is_on_floor():
-			velocity.y = BASE_JUMP_FORCE * delta
+			if is_dashing:
+				dash_jump = true
+			else:
+				velocity.y = BASE_JUMP_FORCE * delta
 		else:
 			_buffer_jump()
+	
+	if dash_jump:
+		velocity.x = 1000 * last_facing_direction[0]
+		velocity.y = -250
 
 	#crouch fall
 	const speed_threshold = -200
@@ -62,8 +71,6 @@ func _manage_movement(delta):
 		velocity.y += 120
 		has_compensated = true
 	
-		
-	
 	#dash jump
 	if Input.is_action_just_pressed("dash"):
 		if canDash:
@@ -74,6 +81,9 @@ func _manage_movement(delta):
 					facing_direction[0] = -1
 			last_facing_direction = facing_direction
 			_dash_jump()
+			
+
+		
 
 func _dash_jump():
 	$dashing_time.start()
